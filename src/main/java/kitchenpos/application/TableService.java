@@ -4,12 +4,18 @@ import kitchenpos.dao.OrderDao;
 import kitchenpos.dao.OrderTableDao;
 import kitchenpos.domain.OrderStatus;
 import kitchenpos.domain.OrderTable;
+import kitchenpos.ui.request.OrderTableChangeEmptyRequest;
+import kitchenpos.ui.request.OrderTableChangeNumberOfGuestsRequest;
+import kitchenpos.ui.request.OrderTableCreateRequest;
+import kitchenpos.ui.request.OrderTableGroupingRequest;
+import kitchenpos.ui.response.OrderTableResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 public class TableService {
@@ -22,19 +28,23 @@ public class TableService {
     }
 
     @Transactional
-    public OrderTable create(final OrderTable orderTable) {
+    public OrderTableResponse create(final OrderTableCreateRequest request) {
+        OrderTable orderTable = request.toEntity();
         orderTable.setId(null);
         orderTable.setTableGroupId(null);
 
-        return orderTableDao.save(orderTable);
+        return new OrderTableResponse(orderTableDao.save(orderTable));
     }
 
-    public List<OrderTable> list() {
-        return orderTableDao.findAll();
+    public List<OrderTableResponse> list() {
+        return orderTableDao.findAll().stream()
+                .map(OrderTableResponse::new)
+                .collect(Collectors.toList());
     }
 
     @Transactional
-    public OrderTable changeEmpty(final Long orderTableId, final OrderTable orderTable) {
+    public OrderTableResponse changeEmpty(final Long orderTableId, final OrderTableChangeEmptyRequest request) {
+        OrderTable orderTable = request.toEntity();
         final OrderTable savedOrderTable = orderTableDao.findById(orderTableId)
                 .orElseThrow(IllegalArgumentException::new);
 
@@ -49,11 +59,12 @@ public class TableService {
 
         savedOrderTable.setEmpty(orderTable.isEmpty());
 
-        return orderTableDao.save(savedOrderTable);
+        return new OrderTableResponse(orderTableDao.save(savedOrderTable));
     }
 
     @Transactional
-    public OrderTable changeNumberOfGuests(final Long orderTableId, final OrderTable orderTable) {
+    public OrderTableResponse changeNumberOfGuests(final Long orderTableId, final OrderTableChangeNumberOfGuestsRequest request) {
+        OrderTable orderTable = request.toEntity();
         final int numberOfGuests = orderTable.getNumberOfGuests();
 
         if (numberOfGuests < 0) {
@@ -69,6 +80,6 @@ public class TableService {
 
         savedOrderTable.setNumberOfGuests(numberOfGuests);
 
-        return orderTableDao.save(savedOrderTable);
+        return new OrderTableResponse(orderTableDao.save(savedOrderTable));
     }
 }

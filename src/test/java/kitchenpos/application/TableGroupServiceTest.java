@@ -2,8 +2,12 @@ package kitchenpos.application;
 
 import kitchenpos.dao.OrderDao;
 import kitchenpos.dao.OrderTableDao;
-import kitchenpos.domain.*;
-import kitchenpos.fixture.OrderFixture;
+import kitchenpos.domain.Order;
+import kitchenpos.domain.OrderStatus;
+import kitchenpos.ui.request.*;
+import kitchenpos.ui.response.OrderResponse;
+import kitchenpos.ui.response.OrderTableResponse;
+import kitchenpos.ui.response.TableGroupResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
@@ -27,27 +32,27 @@ class TableGroupServiceTest extends IntegrationTest {
     @Test
     void create() {
         // given
-        List<OrderTable> orderTables = Arrays.asList(createOrderTable(true), createOrderTable(true));
-        TableGroup tableGroup = new TableGroup();
-        tableGroup.setOrderTables(orderTables);
+        List<OrderTableResponse> orderTableResponses = Arrays.asList(
+                createOrderTable(true), createOrderTable(true));
+
+        TableGroupCreateRequest request = new TableGroupCreateRequest(convert(orderTableResponses));
 
         // when
-        TableGroup savedTableGroup = tableGroupService.create(tableGroup);
+        TableGroupResponse response = tableGroupService.create(request);
 
         // then
-        assertThat(savedTableGroup.getId()).isNotNull();
+        assertThat(response.getId()).isNotNull();
     }
 
     @DisplayName("테이블의 수는 2 이상이어야 한다")
     @Test
     void create_fail_orderTablesSizeShouldGreaterThanOrEqualTo2() {
         // given
-        List<OrderTable> orderTables = Collections.singletonList(createOrderTable(true));
-        TableGroup tableGroup = new TableGroup();
-        tableGroup.setOrderTables(orderTables);
+        List<OrderTableResponse> orderTableResponses = Collections.singletonList(createOrderTable(true));
+        TableGroupCreateRequest request = new TableGroupCreateRequest(convert(orderTableResponses));
 
         // when,then
-        assertThatCode(() -> tableGroupService.create(tableGroup))
+        assertThatCode(() -> tableGroupService.create(request))
                 .isInstanceOf(RuntimeException.class);
     }
 
@@ -55,14 +60,14 @@ class TableGroupServiceTest extends IntegrationTest {
     @Test
     void create_fail_requestedOrderTablesShouldExists() {
         // given
-        OrderTable orderTable = new OrderTable();
-        orderTable.setId(-1L);
-        List<OrderTable> orderTables = Arrays.asList(createOrderTable(true), createOrderTable(true), orderTable);
-        TableGroup tableGroup = new TableGroup();
-        tableGroup.setOrderTables(orderTables);
+        List<OrderTableGroupingRequest> orderTableGroupingRequests = convert(Arrays.asList(
+                createOrderTable(true), createOrderTable(true)));
+        orderTableGroupingRequests.add(new OrderTableGroupingRequest(-1L));
+
+        TableGroupCreateRequest request = new TableGroupCreateRequest(orderTableGroupingRequests);
 
         // when,then
-        assertThatCode(() -> tableGroupService.create(tableGroup))
+        assertThatCode(() -> tableGroupService.create(request))
                 .isInstanceOf(RuntimeException.class);
     }
 
@@ -70,12 +75,13 @@ class TableGroupServiceTest extends IntegrationTest {
     @Test
     void create_fail_allTablesShouldBeEmpty() {
         // given
-        List<OrderTable> orderTables = Arrays.asList(createOrderTable(false), createOrderTable(false));
-        TableGroup tableGroup = new TableGroup();
-        tableGroup.setOrderTables(orderTables);
+        List<OrderTableResponse> orderTableResponses = Arrays.asList(
+                createOrderTable(false), createOrderTable(false));
+
+        TableGroupCreateRequest request = new TableGroupCreateRequest(convert(orderTableResponses));
 
         // when,then
-        assertThatCode(() -> tableGroupService.create(tableGroup))
+        assertThatCode(() -> tableGroupService.create(request))
                 .isInstanceOf(RuntimeException.class);
     }
 
@@ -83,17 +89,16 @@ class TableGroupServiceTest extends IntegrationTest {
     @Test
     void create_fail_allTablesShouldHaveTableGroupId() {
         // given
-        OrderTable orderTable1 = createOrderTable(true);
-        OrderTable orderTable2 = createOrderTable(true);
-        TableGroup tableGroup = new TableGroup();
-        tableGroup.setOrderTables(Arrays.asList(orderTable1, orderTable2));
-        tableGroupService.create(tableGroup);
-
-        TableGroup requestTableGroup = new TableGroup();
-        requestTableGroup.setOrderTables(Arrays.asList(orderTable1, orderTable2));
+        OrderTableResponse orderTableResponse1 = createOrderTable(true);
+        OrderTableResponse orderTableResponse2 = createOrderTable(true);
+        List<OrderTableResponse> orderTableResponses = Arrays.asList(
+                orderTableResponse1, orderTableResponse2);
+        TableGroupCreateRequest tableGroupCreateRequest = new TableGroupCreateRequest(convert(orderTableResponses));
+        tableGroupService.create(tableGroupCreateRequest);
 
         // when,then
-        assertThatCode(() -> tableGroupService.create(requestTableGroup))
+        TableGroupCreateRequest request = new TableGroupCreateRequest(convert(orderTableResponses));
+        assertThatCode(() -> tableGroupService.create(request))
                 .isInstanceOf(RuntimeException.class);
     }
 
@@ -101,16 +106,16 @@ class TableGroupServiceTest extends IntegrationTest {
     @Test
     void ungroup() {
         // given
-        TableGroup tableGroup = new TableGroup();
-        List<OrderTable> orderTables = Arrays.asList(createOrderTable(true), createOrderTable(true));
-        tableGroup.setOrderTables(orderTables);
-        TableGroup savedTableGroup = tableGroupService.create(tableGroup);
+        List<OrderTableResponse> orderTableResponses = Arrays.asList(
+                createOrderTable(true), createOrderTable(true));
+        TableGroupCreateRequest request = new TableGroupCreateRequest(convert(orderTableResponses));
+        TableGroupResponse tableGroupResponse = tableGroupService.create(request);
 
         // when
-        tableGroupService.ungroup(savedTableGroup.getId());
+        tableGroupService.ungroup(tableGroupResponse.getId());
 
         // then
-        assertThat(orderTableDao.findAllByTableGroupId(savedTableGroup.getId()))
+        assertThat(orderTableDao.findAllByTableGroupId(tableGroupResponse.getId()))
                 .allMatch(orderTable -> orderTable.getTableGroupId() == null)
                 .allMatch(orderTable -> !orderTable.isEmpty());
     }
@@ -119,45 +124,44 @@ class TableGroupServiceTest extends IntegrationTest {
     @Test
     void ungroup_fail_relatedOrdersOrderStatusShouldBeCompletion() {
         // 주문,테이블 생성
-        OrderTable savedOrderTable = createOrderTable(false);
+        OrderTableResponse orderTableResponse = createOrderTable(false);
+        long tableId = orderTableResponse.getId();
 
-        OrderLineItem orderLineItem = new OrderLineItem();
-        orderLineItem.setMenuId(1L);
-        orderLineItem.setQuantity(1);
-
-        Order order = OrderFixture.orderForCreate(savedOrderTable.getId(), orderLineItem);
-        Order savedOrder = orderService.create(order);
+        OrderCreateRequest orderCreateRequest = new OrderCreateRequest(tableId,
+                Collections.singletonList(new OrderLineItemCreateRequest(1L, 1)));
+        OrderResponse orderResponse = orderService.create(orderCreateRequest);
 
         // 주문 상태 바꾸기 - 테이블 비우기 시 필요
-        Order completionOrder = new Order();
-        completionOrder.setOrderStatus(OrderStatus.COMPLETION.name());
-        orderService.changeOrderStatus(savedOrder.getId(), completionOrder);
+        orderService.changeOrderStatus(orderResponse.getId(),
+                new OrderChangeStatusRequest(OrderStatus.COMPLETION.name()));
 
-        // 테이블 비우기 - tableGroup 생성 시, 주문상태 바꾸기 시 필요
-        OrderTable orderTable = new OrderTable();
-        orderTable.setEmpty(true);
-        tableService.changeEmpty(savedOrderTable.getId(), orderTable);
+        // 테이블 비우기 - tableGroup 생성 시, 주문상태 변경 시 필요
+        tableService.changeEmpty(tableId, new OrderTableChangeEmptyRequest(true));
 
-        // 주문 상태 바꾸기
-        Order cookingOrder = new Order();
-        cookingOrder.setId(savedOrder.getId());
-        cookingOrder.setOrderStatus(OrderStatus.COOKING.name());
-        orderDao.save(cookingOrder);
+        // 주문 상태 조리 중으로 변경
+        Order order = orderDao.findById(orderResponse.getId()).get();
+        order.setOrderStatus(OrderStatus.COOKING.name());
+        orderDao.save(order);
 
-        // given
-        TableGroup tableGroup = new TableGroup();
-        List<OrderTable> orderTables = Arrays.asList(savedOrderTable, createOrderTable(true));
-        tableGroup.setOrderTables(orderTables);
-        TableGroup savedTableGroup = tableGroupService.create(tableGroup);
+        // 단체 지정
+        OrderTableResponse normalOrderTable = createOrderTable(true);
+        TableGroupResponse tableGroupResponse = tableGroupService.create(
+                new TableGroupCreateRequest(Arrays.asList(
+                        new OrderTableGroupingRequest(tableId),
+                        new OrderTableGroupingRequest(normalOrderTable.getId()))));
 
         // when,then
-        assertThatCode(() -> tableGroupService.ungroup(savedTableGroup.getId()))
+        assertThatCode(() -> tableGroupService.ungroup(tableGroupResponse.getId()))
                 .isInstanceOf(RuntimeException.class);
     }
 
-    private OrderTable createOrderTable(boolean empty) {
-        OrderTable orderTable = new OrderTable();
-        orderTable.setEmpty(empty);
-        return tableService.create(orderTable);
+    private OrderTableResponse createOrderTable(boolean empty) {
+        return tableService.create(new OrderTableCreateRequest(0, empty));
+    }
+
+    private List<OrderTableGroupingRequest> convert(List<OrderTableResponse> orderTableResponses) {
+        return orderTableResponses.stream()
+                .map(orderTableResponse -> new OrderTableGroupingRequest(orderTableResponse.getId()))
+                .collect(Collectors.toList());
     }
 }

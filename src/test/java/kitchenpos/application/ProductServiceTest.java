@@ -1,13 +1,12 @@
 package kitchenpos.application;
 
-import kitchenpos.domain.Product;
-import kitchenpos.fixture.ProductFixture;
+import kitchenpos.ui.request.ProductCreateRequest;
+import kitchenpos.ui.response.ProductResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -19,25 +18,25 @@ class ProductServiceTest extends IntegrationTest {
     @Test
     void create() {
         // given
-        Product product = ProductFixture.productForCreate("product", 1000L);
+        ProductCreateRequest request = new ProductCreateRequest("product", 1000L);
 
         // when
-        Product savedProduct = productService.create(product);
+        ProductResponse response = productService.create(request);
 
         // then
-        assertThat(savedProduct.getId()).isNotNull();
-        assertThat(savedProduct.getName()).isEqualTo("product");
-        assertThat(savedProduct.getPrice().longValue()).isEqualTo(1000L);
+        assertThat(response.getId()).isNotNull();
+        assertThat(response.getName()).isEqualTo("product");
+        assertThat(response.getPrice().longValue()).isEqualTo(1000L);
     }
 
     @DisplayName("상품의 이름은 null일 수 없다")
     @Test
     void create_fail_productNameCannotBeNull() {
         // given
-        Product product = ProductFixture.productForCreate(null, 1000L);
+        ProductCreateRequest request = new ProductCreateRequest(null, 1000L);
 
         // when, then
-        assertThatCode(() -> productService.create(product))
+        assertThatCode(() -> productService.create(request))
                 .isInstanceOf(RuntimeException.class);
     }
 
@@ -45,10 +44,10 @@ class ProductServiceTest extends IntegrationTest {
     @Test
     void create_fail_productPriceCannotBeNull() {
         // given
-        Product product = ProductFixture.productForCreate("product", (BigDecimal) null);
+        ProductCreateRequest request = new ProductCreateRequest("product", null);
 
         // when, then
-        assertThatCode(() -> productService.create(product))
+        assertThatCode(() -> productService.create(request))
                 .isExactlyInstanceOf(IllegalArgumentException.class);
     }
 
@@ -56,10 +55,10 @@ class ProductServiceTest extends IntegrationTest {
     @Test
     void create_fail_productPriceCannotBeNegative() {
         // given
-        Product product = ProductFixture.productForCreate("product", -1L);
+        ProductCreateRequest request = new ProductCreateRequest("product", -1L);
 
         // when, then
-        assertThatCode(() -> productService.create(product))
+        assertThatCode(() -> productService.create(request))
                 .isExactlyInstanceOf(IllegalArgumentException.class);
     }
 
@@ -68,18 +67,18 @@ class ProductServiceTest extends IntegrationTest {
     @ValueSource(longs = {0L, 1L})
     void create_success_productPriceIsZeroOrPositive(Long price) {
         // given
-        Product product = ProductFixture.productForCreate("product", price);
+        ProductCreateRequest request = new ProductCreateRequest("product", price);
 
         // when, then
-        assertThatCode(() -> productService.create(product))
+        assertThatCode(() -> productService.create(request))
                 .doesNotThrowAnyException();
     }
 
     @DisplayName("상품 목록을 조회한다")
     @Test
     void list() {
-        List<Product> products = productService.list();
+        List<ProductResponse> responses = productService.list();
 
-        assertThat(products).hasSize(6);
+        assertThat(responses).hasSize(6);
     }
 }

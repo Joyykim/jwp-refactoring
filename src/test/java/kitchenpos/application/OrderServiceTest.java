@@ -1,13 +1,13 @@
 package kitchenpos.application;
 
-import kitchenpos.domain.Order;
-import kitchenpos.domain.OrderLineItem;
 import kitchenpos.domain.OrderStatus;
-import kitchenpos.domain.OrderTable;
-import kitchenpos.fixture.OrderFixture;
+import kitchenpos.ui.request.*;
+import kitchenpos.ui.response.OrderResponse;
+import kitchenpos.ui.response.OrderTableResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -20,29 +20,26 @@ class OrderServiceTest extends IntegrationTest {
     @Test
     void create() {
         // given
-        OrderTable savedOrderTable = createOrderTable();
-        OrderLineItem orderLineItem = orderLineItem();
-        Order order = OrderFixture.orderForCreate(savedOrderTable.getId(), orderLineItem);
+        OrderTableResponse savedOrderTable = createOrderTable(false);
+        OrderLineItemCreateRequest orderLineItem = new OrderLineItemCreateRequest(1L, 1);
+        OrderCreateRequest request = new OrderCreateRequest(savedOrderTable.getId(), Arrays.asList(orderLineItem));
 
         // when
-        Order savedOrder = orderService.create(order);
+        OrderResponse response = orderService.create(request);
 
         // then
-        assertThat(savedOrder.getId()).isNotNull();
+        assertThat(response.getId()).isNotNull();
     }
 
     @DisplayName("연결된 주문 항목은 비어있으면 안된다")
     @Test
     void create_fail_orderLineItemsCannotBeEmpty() {
         // given
-        OrderTable savedOrderTable = createOrderTable();
-        Order order = OrderFixture.builder()
-                .orderLineItems(Collections.emptyList())
-                .orderTableId(savedOrderTable.getId())
-                .build();
+        OrderTableResponse savedOrderTable = createOrderTable(false);
+        OrderCreateRequest request = new OrderCreateRequest(savedOrderTable.getId(), Collections.emptyList());
 
         // when,then
-        assertThatCode(() -> orderService.create(order))
+        assertThatCode(() -> orderService.create(request))
                 .isInstanceOf(RuntimeException.class);
     }
 
@@ -50,14 +47,13 @@ class OrderServiceTest extends IntegrationTest {
     @Test
     void create_fail_orderLineItemsMenusShouldExists() {
         // given
-        OrderTable savedOrderTable = createOrderTable();
-        OrderLineItem orderLineItem = new OrderLineItem();
-        orderLineItem.setMenuId(-1L);
-        orderLineItem.setQuantity(1);
-        Order order = OrderFixture.orderForCreate(savedOrderTable.getId(), orderLineItem);
+        OrderTableResponse savedOrderTable = createOrderTable(false);
+        OrderLineItemCreateRequest orderLineItemCreateRequest = new OrderLineItemCreateRequest(-1L, 1);
+        OrderCreateRequest request = new OrderCreateRequest(savedOrderTable.getId(),
+                Arrays.asList(orderLineItemCreateRequest));
 
         // when,then
-        assertThatCode(() -> orderService.create(order))
+        assertThatCode(() -> orderService.create(request))
                 .isInstanceOf(RuntimeException.class);
     }
 
@@ -65,11 +61,11 @@ class OrderServiceTest extends IntegrationTest {
     @Test
     void create_fail_orderTableShouldExists() {
         // given
-        OrderLineItem orderLineItem = orderLineItem();
-        Order order = OrderFixture.orderForCreate(-1L, orderLineItem);
+        OrderLineItemCreateRequest orderLineItemCreateRequest = new OrderLineItemCreateRequest(1L, 1);
+        OrderCreateRequest request = new OrderCreateRequest(-1L, Arrays.asList(orderLineItemCreateRequest));
 
         // when,then
-        assertThatCode(() -> orderService.create(order))
+        assertThatCode(() -> orderService.create(request))
                 .isInstanceOf(RuntimeException.class);
     }
 
@@ -77,12 +73,12 @@ class OrderServiceTest extends IntegrationTest {
     @Test
     void create_fail_orderTableCannotBeEmpty() {
         // given
-        OrderTable savedOrderTable = createEmptyOrderTable();
-        OrderLineItem orderLineItem = orderLineItem();
-        Order order = OrderFixture.orderForCreate(savedOrderTable.getId(), orderLineItem);
+        OrderTableResponse savedOrderTable = createOrderTable(true);
+        OrderLineItemCreateRequest orderLineItemCreateRequest = new OrderLineItemCreateRequest(1L, 1);
+        OrderCreateRequest request = new OrderCreateRequest(savedOrderTable.getId(), Arrays.asList(orderLineItemCreateRequest));
 
         // when,then
-        assertThatCode(() -> orderService.create(order))
+        assertThatCode(() -> orderService.create(request))
                 .isInstanceOf(RuntimeException.class);
     }
 
@@ -93,7 +89,7 @@ class OrderServiceTest extends IntegrationTest {
         createOrder();
 
         // when
-        List<Order> orders = orderService.list();
+        List<OrderResponse> orders = orderService.list();
 
         // then
         assertThat(orders).hasSize(1);
@@ -103,58 +99,39 @@ class OrderServiceTest extends IntegrationTest {
     @Test
     void changeOrderStatus() {
         // given
-        Order createdOrder = createOrder();
-        Order order = new Order();
-        order.setOrderStatus(OrderStatus.COOKING.name());
+        OrderResponse orderResponse = createOrder();
+        OrderChangeStatusRequest request = new OrderChangeStatusRequest(OrderStatus.COOKING.name());
 
         // when
-        Order changedOrder = orderService.changeOrderStatus(createdOrder.getId(), order);
+        OrderResponse response = orderService.changeOrderStatus(orderResponse.getId(), request);
 
         // then
-        assertThat(changedOrder.getOrderStatus()).isEqualTo(OrderStatus.COOKING.name());
+        assertThat(response.getOrderStatus()).isEqualTo(OrderStatus.COOKING.name());
     }
 
     @DisplayName("이미 `계산 완료` 상태라면 변경할 수 없다")
     @Test
     void changeOrderStatus_fail() {
         // given
-        Order createdOrder = createOrder();
-        Order completionOrder = new Order();
-        completionOrder.setOrderStatus(OrderStatus.COMPLETION.name());
-        orderService.changeOrderStatus(createdOrder.getId(), completionOrder);
+        OrderResponse createdOrder = createOrder();
+        OrderChangeStatusRequest request = new OrderChangeStatusRequest(OrderStatus.COMPLETION.name());
+        orderService.changeOrderStatus(createdOrder.getId(), request);
 
         // when
-        Order order = new Order();
-        order.setOrderStatus(OrderStatus.COMPLETION.name());
-        assertThatCode(() -> orderService.changeOrderStatus(createdOrder.getId(), order))
+        assertThatCode(() -> orderService.changeOrderStatus(createdOrder.getId(), request))
                 .isInstanceOf(RuntimeException.class);
     }
 
-    private Order createOrder() {
-        OrderTable savedOrderTable = createOrderTable();
-        OrderLineItem orderLineItem = orderLineItem();
-        Order order = OrderFixture.orderForCreate(savedOrderTable.getId(), orderLineItem);
-        return orderService.create(order);
+    private OrderResponse createOrder() {
+        OrderTableResponse orderTableResponse = createOrderTable(false);
+        OrderLineItemCreateRequest orderLineItemCreateRequest = new OrderLineItemCreateRequest(1L, 1);
+        OrderCreateRequest request = new OrderCreateRequest(orderTableResponse.getId(),
+                Collections.singletonList(orderLineItemCreateRequest));
+        return orderService.create(request);
     }
 
-    private OrderLineItem orderLineItem() {
-        OrderLineItem orderLineItem = new OrderLineItem();
-        orderLineItem.setMenuId(1L);
-        orderLineItem.setQuantity(1);
-        return orderLineItem;
-    }
-
-    private OrderTable createOrderTable() {
-        OrderTable orderTable = new OrderTable();
-        orderTable.setEmpty(false);
-        orderTable.setNumberOfGuests(4);
-        return tableService.create(orderTable);
-    }
-
-    private OrderTable createEmptyOrderTable() {
-        OrderTable orderTable = new OrderTable();
-        orderTable.setEmpty(true);
-        orderTable.setNumberOfGuests(4);
-        return tableService.create(orderTable);
+    private OrderTableResponse createOrderTable(boolean empty) {
+        OrderTableCreateRequest request = new OrderTableCreateRequest(0, empty);
+        return tableService.create(request);
     }
 }
