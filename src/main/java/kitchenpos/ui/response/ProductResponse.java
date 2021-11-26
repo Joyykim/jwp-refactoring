@@ -1,6 +1,6 @@
 package kitchenpos.ui.response;
 
-import kitchenpos.domain.Product;
+import kitchenpos.domain.jpa.Product;
 
 import java.math.BigDecimal;
 
@@ -13,7 +13,7 @@ public class ProductResponse {
     public ProductResponse(Product product) {
         id = product.getId();
         name = product.getName();
-        price = product.getPrice();
+        price = product.getPrice().getPrice();
     }
 
     public Long getId() {

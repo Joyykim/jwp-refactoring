@@ -2,6 +2,7 @@ package kitchenpos.domain.jpa;
 
 import javax.persistence.Embeddable;
 import java.math.BigDecimal;
+import java.util.Objects;
 
 @Embeddable
 public class Price {
@@ -14,7 +15,7 @@ public class Price {
     }
 
     private void validate(BigDecimal price) {
-        if (price.compareTo(BigDecimal.ZERO) < 0) {
+        if (Objects.isNull(price) || price.compareTo(BigDecimal.ZERO) < 0) {
             throw new IllegalArgumentException();
         }
     }
