@@ -1,6 +1,6 @@
 package kitchenpos.ui.request;
 
-import kitchenpos.domain.MenuGroup;
+import kitchenpos.domain.jpa.MenuGroup;
 
 public class MenuGroupCreateRequest {
 
@@ -14,8 +14,10 @@ public class MenuGroupCreateRequest {
     }
 
     public MenuGroup toEntity() {
-        MenuGroup menuGroup = new MenuGroup();
-        menuGroup.setName(name);
-        return menuGroup;
+        return new MenuGroup(null, name);
+    }
+
+    public String getName() {
+        return name;
     }
 }

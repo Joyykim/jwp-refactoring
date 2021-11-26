@@ -1,6 +1,6 @@
 package kitchenpos.ui.response;
 
-import kitchenpos.domain.MenuGroup;
+import kitchenpos.domain.jpa.MenuGroup;
 
 public class MenuGroupResponse {
 
