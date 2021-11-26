@@ -1,11 +1,7 @@
 package kitchenpos.application;
 
-import kitchenpos.domain.Menu;
-import kitchenpos.domain.MenuProduct;
-import kitchenpos.domain.Product;
-import kitchenpos.fixture.Fixtures;
-import kitchenpos.fixture.ProductFixture;
 import kitchenpos.ui.request.MenuCreateRequest;
+import kitchenpos.ui.request.MenuProductRequest;
 import kitchenpos.ui.request.ProductCreateRequest;
 import kitchenpos.ui.response.MenuResponse;
 import kitchenpos.ui.response.ProductResponse;
@@ -15,7 +11,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.math.BigDecimal;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -38,8 +33,7 @@ class MenuServiceTest extends IntegrationTest {
         assertThat(response.getPrice().longValue()).isEqualTo(request.getPrice().longValue());
         assertThat(response.getName()).isEqualTo(request.getName());
         assertThat(response.getMenuGroupId()).isEqualTo(request.getMenuGroupId());
-        List<MenuProduct> menuProducts = request.getMenuProducts();
-        assertThat(menuProducts).hasSize(1);
+        assertThat(response.getMenuProducts()).hasSize(1);
     }
 
     @DisplayName("메뉴의 가격은 null일 수 없다")
@@ -93,8 +87,8 @@ class MenuServiceTest extends IntegrationTest {
         ProductCreateRequest productCreateRequest = new ProductCreateRequest("product", BigDecimal.valueOf(1000L));
         ProductResponse productResponse = productService.create(productCreateRequest);
 
-        MenuProduct menuProduct = Fixtures.menuProduct(1, 1, productResponse.getId(), 1);
-        MenuCreateRequest menuCreateRequest = new MenuCreateRequest("메뉴", BigDecimal.valueOf(1001L), 1L, Arrays.asList(menuProduct));
+        MenuCreateRequest menuCreateRequest = new MenuCreateRequest("메뉴", BigDecimal.valueOf(1001L), 1L,
+                Collections.singletonList(new MenuProductRequest(1L, productResponse.getId(), 1)));
 
         // when, then
         assertThatCode(() -> menuService.create(menuCreateRequest))
@@ -109,8 +103,8 @@ class MenuServiceTest extends IntegrationTest {
         ProductCreateRequest productCreateRequest = new ProductCreateRequest("product", BigDecimal.valueOf(1000L));
         ProductResponse productResponse = productService.create(productCreateRequest);
 
-        MenuProduct menuProduct = Fixtures.menuProduct(1, 1, productResponse.getId(), 1);
-        MenuCreateRequest menuCreateRequest = new MenuCreateRequest("메뉴", BigDecimal.valueOf(menuPrice), 1L, Arrays.asList(menuProduct));
+        MenuCreateRequest menuCreateRequest = new MenuCreateRequest("메뉴", BigDecimal.valueOf(menuPrice), 1L,
+                Collections.singletonList(new MenuProductRequest(1L, productResponse.getId(), 1)));
 
         // when, then
         assertThatCode(() -> menuService.create(menuCreateRequest))
@@ -125,8 +119,8 @@ class MenuServiceTest extends IntegrationTest {
         assertThat(responses).hasSize(6);
     }
 
-    private List<MenuProduct> menuProducts() {
-        MenuProduct menuProduct = Fixtures.menuProduct(1, 1, 1, 1);
-        return Collections.singletonList(menuProduct);
+    private List<MenuProductRequest> menuProducts() {
+        MenuProductRequest request = new MenuProductRequest(1L, 1L, 1);
+        return Collections.singletonList(request);
     }
 }

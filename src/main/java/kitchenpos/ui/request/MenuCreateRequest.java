@@ -1,19 +1,21 @@
 package kitchenpos.ui.request;
 
-import kitchenpos.domain.Menu;
-import kitchenpos.domain.MenuProduct;
+import kitchenpos.domain.jpa.Menu;
+import kitchenpos.domain.jpa.MenuProduct;
+import kitchenpos.domain.jpa.Price;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class MenuCreateRequest {
 
     private String name;
     private BigDecimal price;
     private Long menuGroupId;
-    private List<MenuProduct> menuProducts;
+    private List<MenuProductRequest> menuProducts;
 
-    public MenuCreateRequest(String name, BigDecimal price, Long menuGroupId, List<MenuProduct> menuProducts) {
+    public MenuCreateRequest(String name, BigDecimal price, Long menuGroupId, List<MenuProductRequest> menuProducts) {
         this.name = name;
         this.price = price;
         this.menuGroupId = menuGroupId;
@@ -24,12 +26,7 @@ public class MenuCreateRequest {
     }
 
     public Menu toEntity() {
-        Menu menu = new Menu();
-        menu.setName(name);
-        menu.setPrice(price);
-        menu.setMenuGroupId(menuGroupId);
-        menu.setMenuProducts(menuProducts);
-        return menu;
+        return new Menu(null, name, new Price(price), menuGroupId);
     }
 
     public String getName() {
@@ -44,7 +41,7 @@ public class MenuCreateRequest {
         return menuGroupId;
     }
 
-    public List<MenuProduct> getMenuProducts() {
-        return menuProducts;
+    public List<MenuProductRequest> getMenuProducts() {
+        return this.menuProducts;
     }
 }
