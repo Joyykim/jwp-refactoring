@@ -3,6 +3,7 @@ package kitchenpos.domain.jpa;
 import javax.persistence.*;
 
 @Entity
+@Table(name = "menu_product")
 public class MenuProduct {
 
     @Id

@@ -1,6 +1,6 @@
 package kitchenpos.ui.request;
 
-import kitchenpos.domain.OrderTable;
+import kitchenpos.domain.jpa.OrderTable;
 
 public class OrderTableCreateRequest {
 
@@ -24,5 +24,13 @@ public class OrderTableCreateRequest {
         orderTable.setNumberOfGuests(numberOfGuests);
         orderTable.setEmpty(empty);
         return orderTable;
+    }
+
+    public int getNumberOfGuests() {
+        return numberOfGuests;
+    }
+
+    public boolean isEmpty() {
+        return empty;
     }
 }

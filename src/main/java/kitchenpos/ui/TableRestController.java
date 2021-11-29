@@ -4,7 +4,6 @@ import kitchenpos.application.TableService;
 import kitchenpos.ui.request.OrderTableChangeEmptyRequest;
 import kitchenpos.ui.request.OrderTableChangeNumberOfGuestsRequest;
 import kitchenpos.ui.request.OrderTableCreateRequest;
-import kitchenpos.ui.request.OrderTableGroupingRequest;
 import kitchenpos.ui.response.OrderTableResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

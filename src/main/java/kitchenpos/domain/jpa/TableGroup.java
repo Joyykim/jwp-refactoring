@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Objects;
 
 @Entity
+@Table(name = "table_group")
 public class TableGroup {
 
     @Id
@@ -15,9 +16,6 @@ public class TableGroup {
     @Column(name = "created_date", nullable = false)
     private LocalDateTime createdDate;
 
-    @OneToMany(mappedBy = "tableGroup", fetch = FetchType.LAZY)
-    private List<OrderTable> orderTables;
-
     @PrePersist
     public void initCreatedDate() {
         if (Objects.isNull(createdDate)) {
@@ -25,10 +23,9 @@ public class TableGroup {
         }
     }
 
-    public TableGroup(Long id, LocalDateTime createdDate, List<OrderTable> orderTables) {
+    public TableGroup(Long id, LocalDateTime createdDate) {
         this.id = id;
         this.createdDate = createdDate;
-        this.orderTables = orderTables;
     }
 
     public TableGroup() {
@@ -40,9 +37,5 @@ public class TableGroup {
 
     public LocalDateTime getCreatedDate() {
         return createdDate;
-    }
-
-    public List<OrderTable> getOrderTables() {
-        return orderTables;
     }
 }

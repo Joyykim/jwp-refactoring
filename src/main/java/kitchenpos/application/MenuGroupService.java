@@ -7,8 +7,8 @@ import kitchenpos.ui.response.MenuGroupResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class MenuGroupService {
@@ -26,10 +26,8 @@ public class MenuGroupService {
     }
 
     public List<MenuGroupResponse> list() {
-        List<MenuGroupResponse> responses = new ArrayList<>();
-        for (MenuGroup menuGroup : menuGroupRepository.findAll()) {
-            responses.add(new MenuGroupResponse(menuGroup));
-        }
-        return responses;
+        return ((List<MenuGroup>) menuGroupRepository.findAll()).stream()
+                .map(MenuGroupResponse::new)
+                .collect(Collectors.toList());
     }
 }

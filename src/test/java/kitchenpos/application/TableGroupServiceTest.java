@@ -1,7 +1,7 @@
 package kitchenpos.application;
 
 import kitchenpos.dao.OrderDao;
-import kitchenpos.dao.OrderTableDao;
+import kitchenpos.dao.jpa.OrderTableRepository;
 import kitchenpos.domain.Order;
 import kitchenpos.domain.OrderStatus;
 import kitchenpos.ui.request.*;
@@ -23,7 +23,7 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 class TableGroupServiceTest extends IntegrationTest {
 
     @Autowired
-    private OrderTableDao orderTableDao;
+    private OrderTableRepository orderTableRepository;
 
     @Autowired
     private OrderDao orderDao;
@@ -115,7 +115,7 @@ class TableGroupServiceTest extends IntegrationTest {
         tableGroupService.ungroup(tableGroupResponse.getId());
 
         // then
-        assertThat(orderTableDao.findAllByTableGroupId(tableGroupResponse.getId()))
+        assertThat(orderTableRepository.findAllByTableGroupId(tableGroupResponse.getId()))
                 .allMatch(orderTable -> orderTable.getTableGroupId() == null)
                 .allMatch(orderTable -> !orderTable.isEmpty());
     }

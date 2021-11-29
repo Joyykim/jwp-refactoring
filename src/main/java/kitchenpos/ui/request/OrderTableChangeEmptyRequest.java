@@ -1,7 +1,5 @@
 package kitchenpos.ui.request;
 
-import kitchenpos.domain.OrderTable;
-
 public class OrderTableChangeEmptyRequest {
 
     private boolean empty;
@@ -13,9 +11,7 @@ public class OrderTableChangeEmptyRequest {
     public OrderTableChangeEmptyRequest() {
     }
 
-    public OrderTable toEntity() {
-        OrderTable orderTable = new OrderTable();
-        orderTable.setEmpty(empty);
-        return orderTable;
+    public boolean isEmpty() {
+        return empty;
     }
 }

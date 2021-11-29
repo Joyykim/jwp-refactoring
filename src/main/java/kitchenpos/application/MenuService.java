@@ -7,6 +7,7 @@ import kitchenpos.dao.jpa.ProductRepository;
 import kitchenpos.domain.jpa.Menu;
 import kitchenpos.domain.jpa.MenuProduct;
 import kitchenpos.domain.jpa.Price;
+import kitchenpos.domain.jpa.Product;
 import kitchenpos.ui.request.MenuCreateRequest;
 import kitchenpos.ui.request.MenuProductRequest;
 import kitchenpos.ui.response.MenuResponse;
@@ -55,11 +56,13 @@ public class MenuService {
                         MenuProductRequest::getQuantity
                 ));
 
-        BigDecimal sum = BigDecimal.ZERO;
-        for (kitchenpos.domain.jpa.Product product : productRepository.findAllById(productIdQuantityMap.keySet())) {
-            Long quantity = productIdQuantityMap.get(product.getId());
-            sum = sum.add(product.getPrice().getPrice().multiply(BigDecimal.valueOf(quantity)));
-        }
+        BigDecimal sum = ((List<Product>) productRepository.findAllById(productIdQuantityMap.keySet())).stream()
+                .map(product -> {
+                    Long quantity = productIdQuantityMap.get(product.getId());
+                    return product.getPrice().getPrice().multiply(BigDecimal.valueOf(quantity));
+                })
+                .reduce(BigDecimal::add)
+                .orElse(BigDecimal.ZERO);
 
         if (price.getPrice().compareTo(sum) > 0) {
             throw new IllegalArgumentException();
@@ -82,14 +85,10 @@ public class MenuService {
     }
 
     public List<MenuResponse> list() {
-
         List<MenuResponse> menuResponses = new ArrayList<>();
-        for (final Menu menu : menuRepository.findAll()) {
-            menuResponses.add(
-                    new MenuResponse(
-                            menu,
-                            menuProductRepository.findByMenuId(menu.getId())));
-        }
+        menuRepository.findAll()
+                .forEach(menu -> menuResponses.add(new MenuResponse(
+                        menu, menuProductRepository.findByMenuId(menu.getId()))));
 
         return menuResponses;
     }
