@@ -1,7 +1,7 @@
 package kitchenpos.ui.response;
 
-import kitchenpos.domain.jpa.Menu;
-import kitchenpos.domain.jpa.MenuProduct;
+import kitchenpos.domain.Menu;
+import kitchenpos.domain.MenuProduct;
 
 import java.math.BigDecimal;
 import java.util.List;

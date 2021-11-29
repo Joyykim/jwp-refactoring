@@ -1,7 +1,6 @@
-package kitchenpos.domain.jpa;
+package kitchenpos.domain;
 
 import javax.persistence.*;
-import java.util.List;
 
 @Entity
 @Table(name = "menu")

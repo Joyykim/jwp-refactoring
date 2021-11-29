@@ -20,7 +20,8 @@ public class OrderLineItemResponse {
         this.seq = orderLineItem.getSeq();
         this.orderId = orderLineItem.getOrderId();
         this.menuId = orderLineItem.getMenuId();
-        this.quantity = orderLineItem.getQuantity();;
+        this.quantity = orderLineItem.getQuantity();
+        ;
     }
 
     public OrderLineItemResponse() {

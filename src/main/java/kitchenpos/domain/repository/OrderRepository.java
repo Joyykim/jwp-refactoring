@@ -1,7 +1,7 @@
-package kitchenpos.dao.jpa;
+package kitchenpos.domain.repository;
 
-import kitchenpos.domain.jpa.Order;
-import kitchenpos.domain.jpa.OrderStatus;
+import kitchenpos.domain.Order;
+import kitchenpos.domain.OrderStatus;
 import org.springframework.data.repository.CrudRepository;
 
 import java.util.List;

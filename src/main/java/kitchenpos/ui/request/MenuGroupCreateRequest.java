@@ -1,6 +1,6 @@
 package kitchenpos.ui.request;
 
-import kitchenpos.domain.jpa.MenuGroup;
+import kitchenpos.domain.MenuGroup;
 
 public class MenuGroupCreateRequest {
 

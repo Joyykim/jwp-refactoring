@@ -1,11 +1,11 @@
 package kitchenpos.application;
 
-import kitchenpos.dao.jpa.OrderRepository;
-import kitchenpos.dao.jpa.OrderTableRepository;
-import kitchenpos.dao.jpa.TableGroupRepository;
-import kitchenpos.domain.jpa.OrderStatus;
-import kitchenpos.domain.jpa.OrderTable;
-import kitchenpos.domain.jpa.TableGroup;
+import kitchenpos.domain.OrderStatus;
+import kitchenpos.domain.OrderTable;
+import kitchenpos.domain.TableGroup;
+import kitchenpos.domain.repository.OrderRepository;
+import kitchenpos.domain.repository.OrderTableRepository;
+import kitchenpos.domain.repository.TableGroupRepository;
 import kitchenpos.ui.request.OrderTableGroupingRequest;
 import kitchenpos.ui.request.TableGroupCreateRequest;
 import kitchenpos.ui.response.TableGroupResponse;

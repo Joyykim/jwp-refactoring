@@ -1,6 +1,6 @@
-package kitchenpos.dao.jpa;
+package kitchenpos.domain.repository;
 
-import kitchenpos.domain.jpa.TableGroup;
+import kitchenpos.domain.TableGroup;
 import org.springframework.data.repository.CrudRepository;
 
 public interface TableGroupRepository extends CrudRepository<TableGroup, Long> {

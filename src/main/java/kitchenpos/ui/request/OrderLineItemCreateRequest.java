@@ -1,7 +1,5 @@
 package kitchenpos.ui.request;
 
-import kitchenpos.domain.OrderLineItem;
-
 public class OrderLineItemCreateRequest {
 
     private Long menuId;
@@ -13,13 +11,6 @@ public class OrderLineItemCreateRequest {
     }
 
     public OrderLineItemCreateRequest() {
-    }
-
-    public OrderLineItem toEntity() {
-        OrderLineItem orderLineItem = new OrderLineItem();
-        orderLineItem.setMenuId(menuId);
-        orderLineItem.setQuantity(quantity);
-        return orderLineItem;
     }
 
     public Long getMenuId() {

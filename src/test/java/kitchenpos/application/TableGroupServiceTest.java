@@ -1,9 +1,9 @@
 package kitchenpos.application;
 
-import kitchenpos.dao.OrderDao;
-import kitchenpos.dao.jpa.OrderTableRepository;
 import kitchenpos.domain.Order;
 import kitchenpos.domain.OrderStatus;
+import kitchenpos.domain.repository.OrderRepository;
+import kitchenpos.domain.repository.OrderTableRepository;
 import kitchenpos.ui.request.*;
 import kitchenpos.ui.response.OrderResponse;
 import kitchenpos.ui.response.OrderTableResponse;
@@ -26,7 +26,7 @@ class TableGroupServiceTest extends IntegrationTest {
     private OrderTableRepository orderTableRepository;
 
     @Autowired
-    private OrderDao orderDao;
+    private OrderRepository orderRepository;
 
     @DisplayName("단체 지정을 생성한다")
     @Test
@@ -139,9 +139,9 @@ class TableGroupServiceTest extends IntegrationTest {
         tableService.changeEmpty(tableId, new OrderTableChangeEmptyRequest(true));
 
         // 주문 상태 조리 중으로 변경
-        Order order = orderDao.findById(orderResponse.getId()).get();
-        order.setOrderStatus(OrderStatus.COOKING.name());
-        orderDao.save(order);
+        Order order = orderRepository.findById(orderResponse.getId()).get();
+        order.setOrderStatus(OrderStatus.COOKING);
+        orderRepository.save(order);
 
         // 단체 지정
         OrderTableResponse normalOrderTable = createOrderTable(true);

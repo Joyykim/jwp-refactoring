@@ -1,6 +1,6 @@
 package kitchenpos.ui.request;
 
-import kitchenpos.domain.jpa.OrderTable;
+import kitchenpos.domain.OrderTable;
 
 public class OrderTableCreateRequest {
 

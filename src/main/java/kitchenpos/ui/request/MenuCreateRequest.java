@@ -1,12 +1,10 @@
 package kitchenpos.ui.request;
 
-import kitchenpos.domain.jpa.Menu;
-import kitchenpos.domain.jpa.MenuProduct;
-import kitchenpos.domain.jpa.Price;
+import kitchenpos.domain.Menu;
+import kitchenpos.domain.Price;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class MenuCreateRequest {
 

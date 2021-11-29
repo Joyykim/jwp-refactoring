@@ -15,12 +15,12 @@ public class OrderResponse {
     private LocalDateTime orderedTime;
     private List<OrderLineItemResponse> orderLineItems;
 
-    public OrderResponse(Order order) {
+    public OrderResponse(Order order, List<OrderLineItem> savedOrderLineItems) {
         id = order.getId();
-        orderTableId = order.getOrderTableId();
-        orderStatus = order.getOrderStatus();
+        orderTableId = order.getOrderTable().getId();
+        orderStatus = order.getOrderStatus().name();
         orderedTime = order.getOrderedTime();
-        orderLineItems = order.getOrderLineItems().stream()
+        orderLineItems = savedOrderLineItems.stream()
                 .map(OrderLineItemResponse::new)
                 .collect(Collectors.toList());
     }

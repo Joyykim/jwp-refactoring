@@ -1,7 +1,7 @@
 package kitchenpos.ui.response;
 
-import kitchenpos.domain.jpa.OrderTable;
-import kitchenpos.domain.jpa.TableGroup;
+import kitchenpos.domain.OrderTable;
+import kitchenpos.domain.TableGroup;
 
 import java.time.LocalDateTime;
 import java.util.List;

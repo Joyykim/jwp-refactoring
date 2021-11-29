@@ -1,7 +1,7 @@
 package kitchenpos.ui.request;
 
-import kitchenpos.domain.jpa.Price;
-import kitchenpos.domain.jpa.Product;
+import kitchenpos.domain.Price;
+import kitchenpos.domain.Product;
 
 import java.math.BigDecimal;
 

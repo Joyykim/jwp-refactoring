@@ -1,13 +1,13 @@
 package kitchenpos.application;
 
-import kitchenpos.dao.jpa.MenuGroupRepository;
-import kitchenpos.dao.jpa.MenuProductRepository;
-import kitchenpos.dao.jpa.MenuRepository;
-import kitchenpos.dao.jpa.ProductRepository;
-import kitchenpos.domain.jpa.Menu;
-import kitchenpos.domain.jpa.MenuProduct;
-import kitchenpos.domain.jpa.Price;
-import kitchenpos.domain.jpa.Product;
+import kitchenpos.domain.Menu;
+import kitchenpos.domain.MenuProduct;
+import kitchenpos.domain.Price;
+import kitchenpos.domain.Product;
+import kitchenpos.domain.repository.MenuGroupRepository;
+import kitchenpos.domain.repository.MenuProductRepository;
+import kitchenpos.domain.repository.MenuRepository;
+import kitchenpos.domain.repository.ProductRepository;
 import kitchenpos.ui.request.MenuCreateRequest;
 import kitchenpos.ui.request.MenuProductRequest;
 import kitchenpos.ui.response.MenuResponse;
